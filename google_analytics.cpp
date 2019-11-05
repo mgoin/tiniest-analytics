@@ -18,23 +18,24 @@ Mihai Gosa, email:pintea@inthekillhouse.com  twitter: @gosamihai
 #include <assert.h>
 #include <dbg.h>
 
-static CURLM* g_pMultiHandle = NULL;
+static CURLM *g_pMultiHandle = NULL;
 static char g_strServicePath[2048] = {'\0'}; // caches clientID and trackingID after calling init() (http://www.google-analytics.com/collect?v=1&tid=%s&cid=%s)
 
 // utility function, used to replace spaces with pluses for URLs
 static void replace_str_char(char *s, const int len, const char what, const char with)
 {
-	for (int i = 0; i < len; ++i) {
+	for (int i = 0; i < len; ++i)
+	{
 		if (s[i] == what)
 			s[i] = with;
 	}
 }
 
 // utility function, used to send the HTTP get
-static bool execute_curl_url(const char* url, ...)
+static bool execute_curl_url(const char *url, ...)
 {
 	dbg(g_pMultiHandle);
-	if (!g_pMultiHandle) 
+	if (!g_pMultiHandle)
 	{
 		return false;
 	}
@@ -48,7 +49,7 @@ static bool execute_curl_url(const char* url, ...)
 	replace_str_char(strAddr, slen, ' ', '+');
 	dbg(strAddr);
 
-	CURL* pCurlHandle = curl_easy_init();
+	CURL *pCurlHandle = curl_easy_init();
 	curl_easy_setopt(pCurlHandle, CURLOPT_URL, strAddr);
 	curl_easy_setopt(pCurlHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pCurlHandle, CURLOPT_TIMEOUT, 20);
@@ -56,11 +57,12 @@ static bool execute_curl_url(const char* url, ...)
 	return (result == CURLM_OK);
 }
 
-bool google_analytics_init(const char* trackingId, const char* uniqueClientId)
+bool google_analytics_init(const char *trackingId, const char *uniqueClientId)
 {
 	curl_global_init(CURL_GLOBAL_ALL);
-	dbg(g_pMultiHandle = curl_multi_init());
-	if (!g_pMultiHandle) 
+	g_pMultiHandle = curl_multi_init();
+	dbg(g_pMultiHandle);
+	if (!g_pMultiHandle)
 	{
 		return false;
 	}
@@ -73,7 +75,7 @@ bool google_analytics_init(const char* trackingId, const char* uniqueClientId)
 void google_analytics_shutdown()
 {
 	dbg(g_pMultiHandle);
-	if (!g_pMultiHandle) 
+	if (!g_pMultiHandle)
 	{
 		return;
 	}
@@ -83,25 +85,24 @@ void google_analytics_shutdown()
 	g_pMultiHandle = NULL;
 }
 
-void google_analytics_event(const char* category, const char* action, const char* label, unsigned int value)
+void google_analytics_event(const char *category, const char *action, const char *label, unsigned int value)
 {
 	execute_curl_url("%s&t=event&ec=%s&ea=%s&el=%s&ev=%u&z=%d", g_strServicePath, category, action, label, value, rand());
 }
 
-void google_analytics_event(const char* category, const char* action, const char* label)
+void google_analytics_event(const char *category, const char *action, const char *label)
 {
 	execute_curl_url("%s&t=event&ec=%s&ea=%s&el=%s&z=%d", g_strServicePath, category, action, label, rand());
 }
 
-void google_analytics_event(const char* category, const char* action)
+void google_analytics_event(const char *category, const char *action)
 {
 	execute_curl_url("%s&t=event&ec=%s&ea=%s&z=%d", g_strServicePath, category, action, rand());
 }
 
 void google_analytics_update()
 {
-	dbg(g_pMultiHandle);
-	if (!g_pMultiHandle) 
+	if (!g_pMultiHandle)
 	{
 		return;
 	}
@@ -109,15 +110,19 @@ void google_analytics_update()
 	int stillRunning = 0;
 	curl_multi_perform(g_pMultiHandle, &stillRunning);
 
-	CURLMsg* pMsg = NULL;
-	do {
+	CURLMsg *pMsg = NULL;
+	do
+	{
 		int msgsInQueue = 0;
 		pMsg = curl_multi_info_read(g_pMultiHandle, &msgsInQueue);
-		if(pMsg && (pMsg->msg == CURLMSG_DONE)) {
+		if (pMsg && (pMsg->msg == CURLMSG_DONE))
+		{
+			dbg(pMsg);
 			long response_code;
 			curl_easy_getinfo(pMsg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 			dbg(response_code);
-			if (response_code != 200) {
+			if (response_code != 200)
+			{
 				const char *urlp;
 				curl_easy_getinfo(pMsg->easy_handle, CURLINFO_EFFECTIVE_URL, &urlp);
 
