@@ -10,25 +10,22 @@ Mihai Gosa, email:pintea@inthekillhouse.com  twitter: @gosamihai
 
 */
 
-#ifndef INCLUDE_TANALYTICS_H
-#define INCLUDE_TANALYTICS_H
+#pragma once
 
 // 'uniqueClientId' should be unique for each user, e.g. the Steam UID or a randomly generated 32/64bit value
 // e.g. Init("UA-12345678-1", steamClientId)
-bool TAnalytics_Init(const char* trackingId, const char* uniqueClientId);
+bool google_analytics_init(const char* tracking_id, const char* unique_client_id);
 
 // call when exiting app
-void TAnalytics_Shutdown();
+void google_analytics_shutdown();
 
 // call at most once per frame
-void TAnalytics_Update();
+void google_analytics_update();
 
 // read this https://support.google.com/analytics/answer/1033068?hl=en
 // e.g. Event("GameStart", "linux")
 // e.g. Event("WeaponClicked", "RocketLauncher")
 // e.g. Event("MapStarted", "SinglePlayer", "MapName.map")
-void TAnalytics_Event(const char* category, const char* action);
-void TAnalytics_Event(const char* category, const char* action, const char* label);
-void TAnalytics_Event(const char* category, const char* action, const char* label, unsigned int value);
-
-#endif
+void google_analytics_event(char const* category, char const* action);
+void google_analytics_event(char const* category, char const* action, char const* label);
+void google_analytics_event(char const* category, char const* action, char const* label, unsigned int const value);
